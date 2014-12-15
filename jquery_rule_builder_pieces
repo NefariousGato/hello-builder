@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>JSON demo</title>
+  <style>
+  body, select {
+    font-size: 12px;
+    margin: 2px
+  }
+  
+	div {
+		border: 1px solid black;
+		margin: 2px;
+	}
+
+	textarea {
+		height:35px;
+		width: 300px; 
+		margin: 2px;	
+	}	
+	label{
+	font-weight: bold;
+		margin: 2px;	
+	}
+  form {
+    margin: 5px;
+  }
+  p {
+    color: red;
+    margin: 5px;
+  }
+  b {
+    color: blue;
+  }
+  </style>
+  <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+</head>
+<body onload="create_selectors()">
+ 
+<p><b>Results:</b> <span id="results"></span></p>
+<form name='form1'>
+
+<div>
+	<div style="float:left; margin:5px;">
+		<label for="opp_mcc"  >MCCs</label>
+		<br>
+		<select name="op_mcc" id="op_mcc"></select>
+	</div>
+	<div>
+		<textarea name="mcc_text"></textarea>
+		<div style="float:left;margin-right:2px;">
+			<button type="button" ondblclick="reset_text('mcc_text')">DblClick to clear MCCs</button>
+			<br><select id="mcc_sel" name="mcc_sel" onkeypress="add_item_to_list(this, 'mcc_text')"></select>
+		</div>
+	</div>
+</div>
+
+<div>
+	<div style="float:left; margin:5px;">
+		<label for="op_ctry">Country</label>
+		<br>
+		<select name="op_ctry" id="op_ctry"></select>
+	</div>
+	<div>
+		<textarea name="country_text"></textarea>
+		<div style="float:left;margin-right:2px;">
+			<button type="button" ondblclick="reset_text('mcc_text')">DblClick to clear Countries</button>
+			<br><select name="country_sel" id="country_sel" onkeypress="add_item_to_list(this, 'country_text')"></select>
+		</div>
+	</div>
+</div>
+
+<label for="op_amt">Amount</label>
+<select name="op_amt" id="op_amt"></select>
+<input type="text" name="amt" value="" id="amt" size="6">
+<br>
+<!--input type="checkbox" name="check1" value="cp" id="ch1">
+<label for="ch1">check1</label>
+<input type="checkbox" name="check2" value="cnp" checked="checked" id="ch2">
+<label for="ch2">check2</label-->
+<br>
+<label for="r1">Card Present</label> 
+<input type="radio" name="cp" value="1" checked="checked" id="r1">
+&nbsp;&nbsp;&nbsp;&nbsp;  
+<label for="r2">Card Not Present</label>
+<input type="radio" name="cp" value="0" id="r2">
+
+</form>
+ 
+<script>
+
+json_text = '';
+//$( ":checkbox, :radio" ).click( showValues );
+//$( "select" ).change( showValues );
+//showValues();
+
+function reset_text(el) {
+	$('textarea[name="'+el+'"]').val( '' );
+}
+
+function create_selectors() {
+	// MCCs
+	selectValues = { " ": "Select", "=": "EQ", "IN": "IN", "NI": "NOT IN", "BW": "BETWEEN", "NBW": "NOT BETWEEN" };
+	create_selector(selectValues, '#op_mcc');
+	selectValues = { " ":"MCC", "5411": "5411 - Grocery", "5310": "5310 - Dept Stores", "5311":"5311 - Discount Stores" };
+	create_selector(selectValues, '#mcc_sel');
+	
+	// Countries
+	selectValues = { " ": "Select", "=": "EQ", "IN": "IN", "NI": "NOT IN" };
+	create_selector(selectValues, '#op_ctry');
+	selectValues = { " ":"Country", "124": "124 Can", "484": "484 Mex", "840":"840 USA" };
+	create_selector(selectValues, '#country_sel');	
+	
+	// Amount
+	selectValues = { " ": "Select", "GE": ">=", "GT": ">", "EQ": "=", "LE":"<=", "LT":"<" };
+	create_selector(selectValues, '#op_amt');
+
+		
+}
+
+function sort_hash_by_keys(hsh) {
+	var keys = [],
+   k, i, len;
+	for (k in hsh){
+   	if (hsh.hasOwnProperty(k)){
+        keys.push(k);
+    	}
+	}
+	keys.sort();
+	return keys;	
+}
+
+function order_hash_by_keys(hsh) {
+	var keys = [],
+   k, i, len;
+	for (k in hsh){
+   	if (hsh.hasOwnProperty(k)){
+        keys.push(k);
+    	}
+	}
+	return keys;	
+}
+
+function create_selector(hsh, sel) {
+	//var arr = sort_hash_by_keys(hsh);
+	var arr = order_hash_by_keys(hsh);
+
+	$.each(arr, function(idx, value) {
+		var val = hsh[value];
+		$(sel)
+			.append($('<option>', { value : arr[idx] })  
+		 	.text(val));
+	});
+	
+}
+
+function showValues() {
+	var fields = $( ":input" ).serializeArray();
+	$( "#results" ).empty();
+	jQuery.each( fields, function( i, field ) {
+   	$( "#results" ).append( field.value + " " );
+	});
+}
+
+function get_val(sel, texar) {
+	$('textarea[name="'+texar+'"]').val( sel.value );
+}
+
+function add_item_to_list(itm, lst) {
+	var item = itm.value;
+	var list = $('textarea[name="'+lst+'"]').val().split(/[\s,]/);
+	list.push(item);
+	list = sort_unique(list);
+	var tex = list.join(',').replace(/^\s?,/, '');
+	$('textarea[name="'+lst+'"]').val( tex );
+}
+
+function sort_unique(arr) {
+    arr = arr.sort(function (a, b) { return a*1 - b*1; });
+    var ret = [arr[0]];
+    for (var i = 1; i < arr.length; i++) { // start loop at 1 as element 0 can never be a duplicate
+        if (arr[i-1] !== arr[i]) {
+            ret.push(arr[i]);
+        }
+    }
+    return ret;
+}
+
+function stringify() {
+	var fields = $( "form[name='form1']" ).serializeArray();
+ 	json_text = JSON.stringify(fields, null, 2);
+	console.log( "here's the text from form1: " + json_text );
+	//$('input[name="mytext"]').val( json_text );
+	$("textarea[name='mytext']").val( json_text );
+}
+
+function form_fill() {
+	//var txt = $('input[name="mytext"]').val();
+	var txt = $('textarea[name="mytext"]').val();
+	console.log( "here's the text from mytext: " + txt );
+	
+	var obj = JSON.parse(txt);
+	for (var key in obj) { 
+		var myname =  obj[key].name;
+		var myval = obj[key].value; 
+		
+		var $el = $('[name="'+myname+'"]'), type = $el.attr('type');	
+		switch(type){
+     	case 'checkbox':
+      	$el.attr('checked', 'checked');
+         break;
+      case 'radio':
+         $el.filter('[value="'+myval+'"]').attr('checked', 'checked');
+         break;
+      default:
+         $el.val(myval);
+ 		}
+		
+	}	
+		
+}
+  
+</script>
+<button name="stringify" value="stringify" type="button" onclick="stringify()">Stringify</button>
+<br>
+<!--input type="text" name="mytext" size="45" height="14"-->
+
+<br>
+<button name="form_fill" value="form_fill" type="button" onclick="form_fill()">Form Fill</button>
+<textarea name="mytext"  cols="100"></textarea>
+</body>
+
+</html>
