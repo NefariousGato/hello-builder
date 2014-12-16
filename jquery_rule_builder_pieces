@@ -100,21 +100,24 @@ function reset_text(el) {
 }
 
 function create_selectors() {
+
+	var op_order = ['', 'GE', 'GT', 'EQ', 'LE', 'LT', 'NE', 'IN', 'NI', 'BW', 'NB', 'LK', 'NL'];
 	// MCCs
-	selectValues = { " ": "Select", "=": "EQ", "IN": "IN", "NI": "NOT IN", "BW": "BETWEEN", "NBW": "NOT BETWEEN" };
-	create_selector(selectValues, '#op_mcc');
-	selectValues = { " ":"MCC", "5411": "5411 - Grocery", "5310": "5310 - Dept Stores", "5311":"5311 - Discount Stores" };
+	arrValues =
+	selectValues = { "": "Select", "EQ": " = ", "NE":" <> ", "IN": "IN", "NI": "NOT IN", "BW": "BETWEEN", " NB": "NOT BETWEEN" };
+	create_selector_ordered(selectValues, op_order, '#op_mcc');
+	selectValues = { "":"MCC", "5411": "5411 - Grocery", "5310": "5310 - Dept Stores", "5311":"5311 - Discount Stores" };
 	create_selector(selectValues, '#mcc_sel');
 	
 	// Countries
-	selectValues = { " ": "Select", "=": "EQ", "IN": "IN", "NI": "NOT IN" };
-	create_selector(selectValues, '#op_ctry');
-	selectValues = { " ":"Country", "124": "124 Can", "484": "484 Mex", "840":"840 USA" };
+	selectValues = { "": "Select", "NE":"<>", "EQ":"=", "IN":"IN", "NI":"NOT IN" };
+	create_selector_ordered(selectValues, op_order, '#op_ctry');
+	selectValues = { "":"Country", "124": "124 Can", "484": "484 Mex", "840":"840 USA" };
 	create_selector(selectValues, '#country_sel');	
 	
 	// Amount
-	selectValues = { " ": "Select", "GE": ">=", "GT": ">", "EQ": "=", "LE":"<=", "LT":"<" };
-	create_selector(selectValues, '#op_amt');
+	selectValues = { "": "Select", "GE": ">=", "GT": ">", "EQ": "=", "LE":"<=", "LT":"<" };
+	create_selector_ordered(selectValues, op_order, '#op_amt');
 
 		
 }
@@ -142,9 +145,22 @@ function order_hash_by_keys(hsh) {
 	return keys;	
 }
 
+function create_selector_ordered(hsh, ord, sel) {
+	var arr = ord;
+
+	$.each(arr, function(idx, value) {
+		var val = hsh[value];
+		if ( val != null ) {
+			$(sel)
+				.append($('<option>', { value : arr[idx] })  
+			 	.text(val));
+		}
+	});
+}
+
 function create_selector(hsh, sel) {
-	//var arr = sort_hash_by_keys(hsh);
-	var arr = order_hash_by_keys(hsh);
+	var arr = sort_hash_by_keys(hsh);
+	//var arr = order_hash_by_keys(hsh);
 
 	$.each(arr, function(idx, value) {
 		var val = hsh[value];
@@ -152,7 +168,6 @@ function create_selector(hsh, sel) {
 			.append($('<option>', { value : arr[idx] })  
 		 	.text(val));
 	});
-	
 }
 
 function showValues() {
