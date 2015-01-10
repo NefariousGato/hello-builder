@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>JSON demo</title>
+  <style>
+  body, select {
+    font-size: 10px;
+    margin: 2px
+  }
+  
+	div {
+		margin: 1px;
+		border: 1px solid black;
+	}
+	.section {
+		display: inline-table;
+		border: 1px solid black;
+		width: 100%;
+		background-color: lightgreen;
+	}
+	.foci {
+		width: 100%;
+		height: 250px;
+		background-color: beige;
+		top: 1px; 
+		overflow-y: scroll;
+	}
+	.status{
+		width: 100%;
+		background-color: beige;
+		height: 25px;
+		border: 0px;
+		font-size: 11px;
+		font-weight: bold;
+	}
+	#myrow {
+		display: table-row;
+	}
+	#part1 {
+		display: inline-table;
+		border: 2px;
+		position: relative;
+		top: 1px;
+	}
+	#menu {
+		display: inline-table;
+		border: 2px solid black;
+		top: 1px;
+		width: 100%;
+		background-color: lightblue;
+	}
+	.precede {
+		background-color: lightgreen;
+	}
+	#status {
+		display: inline-table;
+		border: 2px solid black;
+		top: 1px;
+		width: 100%;
+		height: 45px;
+		background-color: white;	
+	}
+	button{
+		font-size: 10px;
+		padding: 2px;
+		margin: 2px;
+	}
+	.standard {
+		width: 75px;
+		background-color: orange;
+	}
+	.nav {
+		width:25px;
+		background-color: orange;
+		
+	}
+	textarea {
+		width: 90%; 	
+		height: 15px;
+		padding: 1px;
+	}	
+	#big_display{
+		width: 300px;
+		height: 75px;	
+	}.big{
+		width: 300px;
+		height: 225px;	
+	}
+	.slim{
+		width: 40%;
+		height: 20px;
+		display: inline-block;
+	}
+	.slimshort{
+		width: 20%;
+		height: 20px;
+		display: inline-block;
+	}
+	label{
+		font-weight: bold;
+		margin: 1px;	
+		width: 120px;
+		text-align: right;
+		#border: 1px solid red;		
+	}
+	.left-side{
+		text-align: left;
+		display: inline-block;
+		width: 100px;
+		#border: 1px solid black;
+	}
+	.non-left-side{
+		display: inline-block;
+		width: 60px;
+		#border: 1px dotted grey;	
+	}
+  form {
+    margin: 5px;
+  }
+  p {
+    color: red;
+    margin: 1px;
+  }
+  b {
+    color: blue;
+  }
+  
+  input{
+		margin-right:15px;  
+  
+  }
+  .text-nav {
+	  margin-right:2px;
+	  margin-left:2px;
+	  width:20px;
+  }
+  .numeric {
+	  width: 30px;
+	  background-color: beige;
+  }
+  .alpha {
+	  width: 350px;
+	  background-color: beige;
+  }
+
+  </style>
+  <style>
+  
+.tabs {
+    width: 900px;
+    margin: 5em auto;
+    background-color: #09F;
+    border-radius: 3px 3px 3px 3px;
+}
+ul#tabs-nav {
+    list-style: none;
+    margin: 0;
+    padding: 5px;
+    overflow: auto;
+}
+ul#tabs-nav li {
+    float: left;
+    font-weight: bold;
+    margin-right: 2px;
+    padding: 5px 8px;
+    border-radius: 4px 4px 4px 4px;
+
+    cursor: pointer;
+}
+ul#tabs-nav li:hover, ul#tabs-nav li.active {
+    background-color: #08E;
+}
+#tabs-nav li a {
+    text-decoration: none;
+    color: #FFF;
+}
+.tab-content {
+    padding: 5px;
+    border: 5px solid #09F;
+    background-color: #EEE;
+    overflow: auto;
+    height: 400px;
+}
+  </style>
+  
+  
+  <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+  
+<script>
+	
+$(document).ready(function () {
+	// too drastic $("form[name='form1']").click(function(evt) {
+	//$('#dup_from_linear').click(function(evt) {
+	$( ":button" ).click(function(evt) {
+	//$( "#form1" ).submit(function( event ) {
+		evt.preventDefault();
+	});
+	
+});
+	
+function load() {
+	
+	// Show the first tab and hide the rest
+	$('#tabs-nav li:first-child').addClass('active');
+	$('.tab-content').hide();
+	$('.tab-content:first').show();
+
+	// Click function
+	$('#tabs-nav li').click(function () {
+		$('#tabs-nav li').removeClass('active');
+		$(this).addClass('active');
+		$('.tab-content').hide();
+		var activeTab = $(this).find('a').attr('href');
+		//$(activeTab).fadeIn(55);
+		$(activeTab).show();
+		return false;
+	});
+	// http://dobsondev.com/simple-jquery-tabs/
+
+	// ophash is global
+	ophash = { '':'Select', 'LT':'<', '<=':'LE', 'EQ':'=', 'NE':'<>', 'GT':'>', 'GE':'>=', 'LE':'<=', 'LK':'LIKE', 'NL':'NOT LIKE', 'IN':'IN', 'NI':'NOT IN', 'CN':'CONTAINS', "BW":"BETWEEN", "NB":"NOT BETWEEN" };
+
+	populate('linear', '_1');  // linear portion. always
+	populate('precede', '_0'); // velo/folo
+	menu_content();
+	
+	$('input[name="navbar"]').on('change', function() {
+		// hide them all then show selected
+		var itm = $('input[name="navbar"]:checked').val();
+		var navbar = $('input[name="navbar"]');
+		navbar.each( function (index){
+			if (itm === navbar[index].value){
+				$('#' + navbar[index].value).show();
+			} else {
+				$('#' + navbar[index].value).hide();
+			}
+		});
+		var itm = $('input[name="navbar"]:checked').val();
+
+	});
+	
+	var ops = $("select[name^='ops']");
+	ops.click(function () {
+
+	    var sfx = this.name.substring(3);
+	    var op = $("select[name='ops" + sfx + "']").val() === '';
+	    $("textarea[name$=" + sfx + "]").prop('disabled', op);
+	    if (op) $("textarea[name$=" + sfx + "]").val('');
+	});
+	
+	ops.keypress(function (e) {
+	    var code = e.keyCode || e.which;
+	    if (code == 13) { //Enter keycode
+	        var sfx = this.name.substring(3);
+	        var op = $("select[name$='" + sfx + "']").val() === '';
+	        $("textarea[name$=" + sfx + "]").prop('disabled', op);
+	        if (op) $("textarea[name$=" + sfx + "]").val('');
+	    }
+	});
+
+	// interesting idea, but may not work
+	$( "select[name^='sel']" ).blur(function() {
+		var sels = $("select[name^='sel']");
+		sels.each (	function() {
+			var sfx = this.name.substring(3);
+			transferItemToText(sfx);
+		});
+	});
+	
+	// Will spin thru ALL "sel" selections and transfer them
+	$( "select[name^='sel']" ).mouseup(function() {
+		var sels = $("select[name^='sel']");
+		sels.each (	function() {
+			var sfx = this.name.substring(3);
+			transferItemToText(sfx);
+		});
+	});
+
+	$( "select[name^='sel']" ).keypress(function(e) {
+		var sels = $("select[name^='sel']");
+		if (e.which == 13) { // 'enter' key 
+			sels.each (	function() {
+				var sfx = this.name.substring(3);
+				transferItemToText(sfx);
+				
+			});
+
+		}
+
+	});	
+		
+	function transferItemToText(sfx){
+	
+		console.log(sfx);
+	    var op = $("select[name='ops" + sfx + "']").val() !== '';
+	    if (op) {
+			var itm = $("select[name='sel" + sfx + "']").val();
+			var txt = $('textarea[name$="' + sfx + '"]').val();
+			console.log(txt);
+			
+	        if (itm !== '') {
+	            var list = $('textarea[name$="' + sfx + '"]').val().split(/[\s,]/);
+	            list.push(itm);
+	            list = sort_unique(list);
+	            var tex = list.join(',').replace(/^\s?,/, '');
+	        
+	            in_between('ops'+sfx, tex);
+	            $('textarea[name$="' + sfx + '"]').val(tex);
+	        }
+	    }   
+	}
+
+}
+
+function stringify(txt) {
+	var fields = $( "form[name='form1']" ).serializeArray();
+ 	json_text = JSON.stringify(fields, null, 2);
+	var rule_text = json_text.replace(/\s+/g, ' ');
+	$("textarea[name='"+txt+"']").val( rule_text );
+	return rule_text;
+}
+
+function validateInputClass(classname){
+	// we will want 
+}
+
+function dup_section(src, tgt){
+	
+	var fields = $( "form[name='form1']" ).serializeArray();
+	var len = fields.length;
+	console.log('len: '+len);
+
+	var re = new RegExp(tgt+'$', "g");
+
+	while (len--){ 
+		if (fields[len].name.match(re) !== null){
+			console.log('tgt '+fields[len].name);
+			fields.splice(len, 1);
+		}
+	}
+	
+	len = fields.length;
+	var re = new RegExp(src+'$', "g");
+	for (var i=0;i<len;i++){
+		if (fields[i].name.match(re) !== null){
+			//console.log(' name_src:'+fields[i].name);
+			var tmp = {};
+			jQuery.extend(tmp, fields[i]);
+			tmp.name = tmp.name.replace(src, tgt);
+			//console.log(tmp.name + ' ' + fields[i].name);
+			fields.push(tmp);
+		}
+	}
+	
+	
+	json_text = JSON.stringify(fields, null, 2);
+	var rule_text = json_text.replace(/\s+/g, ' ');
+	$("textarea[name='txtJSON']").val( rule_text );
+	
+	form_fill();
+	//return rule_text;	
+	
+}
+
+
+function form_fill() {
+	var txt = $('textarea[name="txtJSON"]').val();
+	//console.log( "here's the text from txtJSON: " + txt );
+	// uncheck them all and check as they are added
+	
+	$("input:checkbox").prop('checked', false);
+	
+	var obj = JSON.parse(txt);
+	for (var key in obj) { 
+		var myname =  obj[key].name;
+		var myval = obj[key].value; 
+		
+		var $el = $('[name="'+myname+'"]'), type = $el.attr('type');
+		$el.attr('disabled', false); // if has a value, want it enabled	
+		switch(type){
+     	case 'checkbox':
+			$el.prop('checked', 'checked');
+			break;
+		case 'radio':
+			$el.filter('[value="'+myval+'"]').attr('checked', 'checked');
+			break;
+		default:
+			$el.val(myval);
+ 		}
+	}
+}
+
+function get_val(sel, texar) {
+	$('textarea[name="'+texar+'"]').val( sel.value );
+}
+
+function in_between(op, vartxt) {
+	var lst = vartxt.split(/[,|\s]/);
+	var optx = $('#'+op).val();
+	if ( lst.length == 2 && optx.match(/BW/) ){
+		console.log( optx + lst.length );
+	}
+}
+
+// toggle to enable/disable
+function toggle(el1, val, el2) {
+	$(document).keypress(function(e) {
+		if ( $('#'+el1).val() === '' ) {
+			$('textarea[name="'+el2+'"]').enabled() ;
+		}
+	});
+}
+/*
+function add_item_to_list(itm, lst, op) {
+	// just the enter button
+	$(document).keypress(function(e) {
+	   if(e.which == 13) {
+	     // enter pressed
+	  	  var item = itm.value;
+	  	  if (item != ''){
+		 	  var list = $('textarea[name="'+lst+'"]').val().split(/[\s,]/);
+		 	  list.push(item);
+		 	  list = sort_unique(list);
+		 	  var tex = list.join(',').replace(/^\s?,/, '');
+		 	  in_between(op, tex) ;	
+		 	  $('textarea[name="'+lst+'"]').val( tex );   
+			} 
+	   }
+  });
+
+}*/
+
+function sort_unique(arr) {
+    //arr = arr.sort(function (a, b) { return a*1 - b*1; });
+    arr = arr.sort();
+    var ret = [arr[0]];
+    for (var i = 1; i < arr.length; i++) { // start loop at 1 as element 0 can never be a duplicate
+        if (arr[i-1] !== arr[i]) {
+            ret.push(arr[i]);
+        }
+    }
+    return ret;
+}
+
+function describe() {
+	var txt = $('textarea[name="txtJSON"]').val();
+	var retval = '';
+		var obj = JSON.parse(txt);
+		for (var key in obj) { 
+			var myname =  obj[key].name;
+			var myval = obj[key].value; 
+			retval += '"' + myname + '"\t:\t"' + myval + '"\n' ;
+	 	}	
+	
+	$('textarea[name="txtdescription"]').val(retval);
+	return retval;
+}
+
+function rule_display() {
+	alert(this.name);
+}
+
+//
+// Very Important Objects
+//
+
+// my input_unit object
+function input_unit(var_name, title , arr, hash){
+    this.var_name = var_name;
+    this.title = title;
+    this.arr = arr;
+    this.hash = hash;
+    
+}
+// methods
+input_unit.prototype.option_string = function(){
+    var arr = this.arr;
+    var hash = this.hash;
+    var str = '<select id="' + this.var_name + '">';
+    for (var i = 0; i < arr.length; i++){
+        str += '<option value="' + hash[arr[i]] + '">';
+        str += arr[i] + '</option>';
+    }
+    str += '</select>';
+    return str;
+};
+// methods
+input_unit.prototype.radio_string = function(){
+    var arr = this.arr;
+    var hash = this.hash;
+    var str = '';
+    var var_name = this.var_name;
+
+    for (var i = 0; i < arr.length; i++){
+        str += '<input type="radio" name="' + var_name + '" ';
+        str += 'id="' + var_name + '" ';
+        if (i === 0) str += ' checked ';
+        str += 'value="' + hash[arr[i]] + '">';
+        str += arr[i] + '</input>';
+    }
+    return str;
+};
+// methods
+input_unit.prototype.add_checkboxes = function(arr, hash, tag){
+    var str = '&nbsp;&nbsp;';
+    for (var i = 0; i < arr.length; i++){
+        str += '<label for=\'' + this.var_name + '\' class=\'non-left-side\'>' + hash[arr[i]] + '</label>';
+        str += '<input type="checkbox" name="chk' + hash[arr[i]] + tag + '" ';
+        str += 'id="op' + hash[arr[i]] + tag + '" ';
+        str += 'value="' + arr[i] + '"></input>';
+    }
+    return str;
+};
+// methods
+input_unit.prototype.add_text_input = function(){
+    var str = '<textarea id="txt' + this.var_name + '" ';
+    str += 'name="txt' + this.var_name + '"></textarea>';
+    console.log(str);
+    return str;
+};
+// methods
+input_unit.prototype.add_label = function(){
+    var str = '<label id="lbl' + this.var_name + '" ';
+    str += 'name="lbl' + this.var_name + '">';
+    str += this.title + '</label>';
+    return str;
+};
+// methods
+input_unit.prototype.add_hidden = function(hidval){
+    var str = '<input type="hidden" id="hid' + this.var_name + '" ';
+    str += 'name="hid' + this.var_name + '" value="' + hidval + '">';
+    return str;
+};
+// methods
+input_unit.prototype.add_select_operator = function(arr, hash, prefix){
+    var str = '<select id="' + prefix + this.var_name + '" name="' + prefix + this.var_name + '">';
+    for (var i = 0; i < arr.length; i++){
+        str += '<option value="' + arr[i] + '">';
+        str += hash[arr[i]] + '</option>';
+    }
+    str += '</select>';
+    console.log(str);
+    return str;
+};
+// methods
+input_unit.prototype.add_radio_operator = function(arr, hash){
+    var str = '&nbsp;&nbsp;';
+    for (var i = 0; i < arr.length; i++){
+        str += '<label for=\'' + this.var_name + '\' class=\'non-left-side\'>' + hash[arr[i]] + '</label>';
+        str += '<input type="radio" name="' + this.var_name + '" ';
+        str += 'id="op' + this.var_name + '" ';
+        if (i === 0) str += ' checked ';
+        str += 'value="' + arr[i] + '"></input>';
+    }
+    return str;
+};
+// methods
+input_unit.prototype.add_function = function(el, evt, fx){
+    $('#' + el).bind(evt, function( event ){
+   		eval(fx);
+	 });
+};
+
+
+
+// executed from the load function
+function populate(container, tag){
+    
+    //var parent = '#linear';
+    var parent = '#' + container;
+    
+    // mccs
+    hsh = { "":"MCCs", "5411": "5411 - Grocery", "5310": "5310 - Dept Stores", "5311":"5311 - Discount Stores", "5541":"5541 Fuel", "5542":"5542 AFD" };  
+    arr = [ '', '5310', '5311', '5411', '5541', '5542'];
+    oparr = ['', 'IN', 'NI', 'EQ', 'NE', 'BW', 'NB', 'GT', 'LT'];
+    listizer = new input_unit('mcc' + tag, 'MCCs', arr, hsh);
+    $(parent).append('<p>').append('<label class="left-side">MCCs</label>');
+    $(parent).append(listizer.add_select_operator(oparr, ophash, 'ops'));
+    $(parent).append(listizer.add_select_operator(arr, hsh, 'sel'));
+    $(parent).append(listizer.add_text_input());
+
+    hsh = { "":"Select", "0":"CNP", "1": "CNP" };
+    arr = [ '', '0', '1'];
+    listizer = new input_unit('cp' + tag, 'Card Present', arr, hsh);
+    $(parent).append('<p>').append('<label class="left-side">Card Present</label>');
+    $(parent).append(listizer.add_radio_operator(arr, hsh));
+
+    hsh = { "":"Select", "0":"CHP", "1": "CHNP" };
+    arr = [ '', '0', '1'];
+    listizer = new input_unit('chp' + tag, 'Card Holder Present', arr, hsh);
+    $(parent).append('<p>').append('<label class="left-side">Card Holder Present</label>');
+    $(parent).append(listizer.add_radio_operator(arr, hsh));
+    
+    hsh = { "":"Select", "0":"SIG", "1": "PIN" };
+    arr = [ '', '0', '1'];
+    listizer = new input_unit('pinindicator' + tag, 'PIN/SIG', arr, hsh);
+    $(parent).append('<p>').append('<label class="left-side">PIN/Signature</label>');
+    $(parent).append(listizer.add_radio_operator(arr, hsh));    
+    
+    hsh = { "0":"Recurring", "1": "Regular" };
+    arr = [ '0', '1'];
+    listizer = new input_unit('stuff' + tag, 'Stuff', arr, hsh);
+    $(parent).append('<p>').append('<label class="left-side">Stuff</label>');
+    $(parent).append(listizer.add_checkboxes(arr, hsh, tag));
+
+    // Merchant
+    hsh = {'':'Select', 'LK':'Like', 'NL':'Not Like', 'CN':'Contains', 'NC':'Not Contains'};
+    oparr = ['', 'LK', 'NL', 'CN', 'NC'];
+    listizer = new input_unit('merch' + tag, 'Merchant Name', arr, hsh);
+    $(parent).append('<p>').append('<label class="left-side">Merchant Name</label>');
+    $(parent).append(listizer.add_radio_operator(oparr, hsh));
+    $(parent).append(listizer.add_text_input());
+
+    // City
+    hsh = {'':'Select', 'LK':'Like', 'NL':'Not Like', 'BW':'Between', 'NB':'Not Between'};
+    oparr = ['', 'LK', 'NL'];
+    listizer = new input_unit('city' + tag, 'City', arr, hsh);
+    $(parent).append('<p>').append('<label class="left-side">Cities</label>');
+    $(parent).append(listizer.add_radio_operator(oparr, hsh));
+    $(parent).append(listizer.add_text_input());
+
+    // ZIP
+    hsh = {'':'Select', 'LK':'Like', 'NL':'Not Like', 'BW':'Between', 'NB':'Not Between'};
+    oparr = ['', 'LK', 'NL', 'BW', 'NB'];
+    listizer = new input_unit('zip' + tag, 'ZIP Code', arr, hsh);
+    $(parent).append('<p>').append('<label class="left-side">ZIP Codes</label>');
+    $(parent).append(listizer.add_radio_operator(oparr, hsh));
+    $(parent).append(listizer.add_text_input());
+    // experimental... add additional ZIP
+    $(parent).append('<button name="btnDupeInput" onclick="addInput(\'ZIP\', \'ZIP\')">Add</button>');
+
+    // states
+    hsh = { "":"States", "WA":"Evergreen", "AL": "Bama", "AR": "Razorbacks", "CA":"Bears", "GA":"Peach", "HI":"Aloha" };  
+    arr = [ '', 'AL', 'AR', 'CA', 'GA', 'HI', 'WA'];
+    oparr = ['', 'IN', 'NI', 'EQ', 'NE'];
+    listizer = new input_unit('state' + tag, 'States', arr, hsh);
+    $(parent).append('<p>').append('<label class="left-side">States</label>');
+    $(parent).append(listizer.add_select_operator(oparr, ophash, 'ops'));
+    $(parent).append(listizer.add_select_operator(arr, hsh, 'sel'));
+    $(parent).append(listizer.add_text_input());
+
+	// Countries
+    var arr = ['', '840', '124', '484', '826', 'NULL' ];
+    var hsh = { "":"Select", "124": "124 Can", "484": "484 Mex", "840":"840 USA", "826":"826 UK", "NULL":"NULL" };
+    var oparr = ['', 'IN', 'NI', 'EQ', 'NE'];
+    listizer = new input_unit('country' + tag, 'Country', arr, hsh);
+    //$(parent).append(listizer.add_label());
+    $(parent).append('<label class="left-side">Countries</label>')
+			 .append(listizer.add_select_operator(oparr, ophash, 'ops'));
+    $(parent).append(listizer.add_select_operator(arr, hsh, 'sel'));
+	$(parent).append(listizer.add_hidden('sqltype=char'));
+    $(parent).append(listizer.add_text_input());   
+
+}
+
+
+function menu_content(){
+    hsh = { "1":"Include", "0": "Exclude" };
+    arr = [ '1', '0']	
+	listizer = new input_unit('cardgroup', 'Card Group', arr, hsh);
+	
+	$('#card_group').append(listizer.add_radio_operator(arr, hsh))
+	.append('&nbsp;&nbsp;')
+	.append("<label for='txtCardGroup'>Card Group Name: </label>");
+	$('#card_group').append('<input type="text" id="txtCardGroup" name="txtCardGroup" class="alpha">')
+					.append('&nbsp;')
+					.append('<input type="text" id="txtCGCount" name="txtCGCount" class="numeric">');
+}
+
+function show_item(itm, par){
+	var navs = $( "#" + par ).children();
+	navs.each(function( index ) {
+		alert( navs[index].name + ' ' + itm );
+	});
+
+
+}
+
+
+
+
+</script>  
+  
+</head>
+<body onload="load()">
+	
+<div class="wrapall">
+    <div class="tabs" id="task">
+        <button class="standard" id="rule_clear" name="rule_clear">New</button>
+        <button class="standard" id="rule_save" name="rule_save">Save</button>
+        <button class="nav" id="nav_left" name="nav_button">|<</button>        
+        <button class="nav" id="nav_left" name="nav_button"><</button>
+        <input type="text" class="text-nav"></input>
+        <button class="nav" id="nav_right" name="nav_button">></button>
+        <button class="nav" id="nav_right" name="nav_button">>>|</button>
+    </div>
+    <div class="tabs">
+        <ul id="tabs-nav">
+            <li> <a href="#linear">Linear</a>
+            </li>
+            <li><a href="#precede">Preceding</a>
+            </li>
+            <li><a href="#velocity">Velocity</a>
+            </li>
+            <li><a href="#card_group">Card Group</a>
+            </li>
+            <li><a href="#SQL">SQL / Description</a>
+            </li>
+        </ul>
+        <!-- END tabs-nav -->
+        <form name='form1'>
+            <div id="tabs-content">
+                <div class="tab-content" id="linear">
+					<div class="status">Linear Criteria</div>
+                    <button name="dup_from" id="dup_from_precede" onclick="dup_section('_0', '_1')">Duplicate from Precede</button>
+                    <br>
+                </div>
+                <div class="tab-content" id="precede" hidden>
+					<div class="status">Preceding Portion.</div>
+                    <button name="dup_from" id="dup_from_linear" onclick="dup_section('_1', '_0')">Duplicate from Linear</button>
+                    <br>
+                </div>
+                <div class="tab-content" id="velocity" hidden>
+					<div class="status">Velocity Parameters</div>
+					<label for="selVeloInterval" id="lblVeloInterval">Interval Period</label>
+					<input id="txtVeloInterval" name="txtVeloInterval" type="text" class="numeric" value="">
+					<select id="VeloInterval" name="VeloInterval">
+						<option value="MINUTEINTERVAL">Minute</option>
+						<option value="HOURINTERVAL">Hour</option>
+						<option value="DAYINTERVAL">Day</option>
+					</select>
+                    <br>
+                </div>
+                <div class="tab-content" id="card_group" hidden>
+					<div class="status">Card Group Parameters</div>
+					
+                </div>
+                <div class="tab-content" id="SQL" hidden>SQL/Description
+                    <button name="form_fill" value="form_fill" type="button" onclick="form_fill()">Form Fill</button>
+                    <textarea id="txtSQL" name="txtSQL" class="big"></textarea>
+                    <textarea id="txtDESC" name="txtDESC" class="big"></textarea>
+                </div>
+            </div>
+            <div class="tab-content" id="output" hidden>
+                <button name="stringify" value="stringify" type="button" onclick="stringify('txtJSON')">Stringify</button>
+                <textarea id="txtJSON" name="txtJSON" class="big"></textarea>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+
+</html>
